@@ -16,7 +16,6 @@
         .draggable-stamp { touch-action: none; user-select: none; }
         .hide { display: none !important; }
         #pdf-render-canvas { width: 100%; height: auto; display: block; border: 1px solid #ccc; background: white; }
-        /* ตกแต่งแท็บ */
         .tab-btn { padding: 0.5rem 1rem; font-weight: 600; border-radius: 0.375rem; cursor: pointer; transition: all 0.2s; }
         .tab-active { background-color: #2563eb; color: white; }
         .tab-inactive { background-color: #e5e7eb; color: #374151; }
@@ -26,7 +25,6 @@
 </head>
 <body>
 
-    <!-- ==================== หน้าต่าง Login ==================== -->
     <div id="login-view" class="min-h-screen flex items-center justify-center">
         <div class="bg-white p-8 rounded-xl shadow-lg w-96 max-w-full">
             <div class="text-center mb-6">
@@ -47,7 +45,6 @@
         </div>
     </div>
 
-    <!-- ==================== หน้า Dashboard ==================== -->
     <div id="dashboard-view" class="hide min-h-screen">
         <nav class="bg-blue-700 shadow-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,14 +61,25 @@
         </nav>
 
         <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-3 sm:space-y-0">
                 <div id="admin-actions" class="hide">
                     <button onclick="showUploadModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow flex items-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        นำเข้าหนังสือรับเรื่องใหม่ (Step 1)
+                        นำเข้าหนังสือรับเรื่องใหม่
                     </button>
                 </div>
-                <div>
+                <div class="flex items-center space-x-2">
+                    <!-- Dropdown Filter (เรียงตามสถานะ) -->
+                    <select id="doc-filter" onchange="renderTable()" class="border-gray-300 rounded shadow-sm text-sm py-2 px-3 focus:outline-none focus:ring-blue-500">
+                        <option value="all">แสดงเอกสารทั้งหมด</option>
+                        <!-- ตัวเลือกสำหรับ Inbox -->
+                        <option value="unread" class="filter-inbox hide">เอกสารที่ยังไม่ได้ดู</option>
+                        <option value="read" class="filter-inbox hide">เอกสารที่ดูแล้ว</option>
+                        <!-- ตัวเลือกสำหรับ All Docs -->
+                        <option value="incomplete" class="filter-all hide">รับทราบยังไม่ครบ</option>
+                        <option value="complete" class="filter-all hide">รับทราบครบทุกคน</option>
+                    </select>
+                    
                     <button onclick="fetchDocuments()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded shadow flex items-center text-sm">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         รีเฟรชข้อมูล
@@ -79,10 +87,11 @@
                 </div>
             </div>
 
-            <!-- Tabs System (แสดงให้ผู้บริหารและธุรการ) -->
+            <!-- Tabs System -->
             <div class="flex space-x-2 mb-4" id="tabs-container">
-                <button id="tab-action" onclick="switchTab('action')" class="tab-btn tab-active">งานรอเกษียณ</button>
+                <button id="tab-action" onclick="switchTab('action')" class="tab-btn tab-active hide">งานรอเกษียณ</button>
                 <button id="tab-inbox" onclick="switchTab('inbox')" class="tab-btn tab-inactive">จดหมายเข้า</button>
+                <button id="tab-all" onclick="switchTab('all')" class="tab-btn tab-inactive hide">จดหมายทั้งหมด</button>
             </div>
 
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -104,7 +113,7 @@
         </main>
     </div>
 
-    <!-- ==================== Modal อัปโหลดไฟล์ ==================== -->
+    <!-- Modal นำเข้าหนังสือใหม่ -->
     <div id="upload-modal" class="hide fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
         <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
@@ -116,21 +125,15 @@
                     <label class="block text-gray-700 text-sm font-bold mb-2">ไฟล์ PDF</label>
                     <input type="file" id="pdf-file" accept="application/pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
                 </div>
-                
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">จาก</label>
                     <input list="sender-options" id="doc-from" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ระบุหน่วยงานผู้ส่ง หรือเลือกจากรายการ" required>
-                    <datalist id="sender-options">
-                        <option value="สพป.ชม.2">
-                        <option value="เทศบาลตำบลแม่แตง">
-                    </datalist>
+                    <datalist id="sender-options"><option value="สพป.ชม.2"><option value="เทศบาลตำบลแม่แตง"></datalist>
                 </div>
-
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">เรื่อง</label>
-                    <input type="text" id="doc-subject" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ระบุเรื่องหนังสือ" required>
+                    <input type="text" id="doc-subject" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeUploadModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">ยกเลิก</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">บันทึกและนำเข้าระบบ</button>
@@ -139,7 +142,26 @@
         </div>
     </div>
 
-    <!-- ==================== หน้า Workspace (จัดการ PDF & ตราประทับ) ==================== -->
+    <!-- Modal แนบไฟล์ (Step 5) -->
+    <div id="attach-modal" class="hide fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">แนบไฟล์ตอบกลับ</h2>
+                <button onclick="closeAttachModal()" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+            </div>
+            <form id="attach-form" onsubmit="submitAttach(event)">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">เลือกไฟล์ (รูปภาพ, PDF, Word)</label>
+                    <input type="file" id="attach-file" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" required>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeAttachModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">ยกเลิก</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">อัปโหลดไฟล์แนบ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="workspace-view" class="hide min-h-screen bg-gray-800 flex flex-col">
         <div class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
             <div>
@@ -148,12 +170,6 @@
                 <span id="workspace-doc-info" class="ml-4 text-sm text-gray-400"></span>
             </div>
             <div id="workspace-actions" class="flex items-center space-x-3">
-                <!-- ปุ่มรับทราบ (ใช้ในโหมด Inbox) -->
-                <button id="btn-acknowledge" onclick="acknowledgeDoc()" class="hide bg-green-600 hover:bg-green-700 font-bold px-4 py-2 rounded text-white shadow-lg">
-                    กดรับทราบ
-                </button>
-                
-                <!-- ปุ่มประทับตรา (ใช้ในโหมดเกษียณ) -->
                 <button id="btn-stamp-save" onclick="saveAndStamp()" class="hide bg-blue-600 hover:bg-blue-700 font-bold px-6 py-2 rounded text-white shadow-lg flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     บันทึกและส่งต่อ
@@ -163,27 +179,26 @@
 
         <div class="flex-grow overflow-auto p-8 flex flex-col items-center relative" id="pdf-scroll-area">
             <div id="pdf-container" style="position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; background: white;">
-                <!-- แกนหลักสำหรับวาด PDF จริง -->
                 <canvas id="pdf-render-canvas"></canvas>
 
-                <!-- ================= ตราประทับ: ธุรการ (โปร่งใส ไม่มีเส้น) ================= -->
-                <div id="stamp-step1-1" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 140px; position: absolute; top: 20px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
+                <!-- ================= ตราประทับ: ธุรการ (ขยายความกว้าง + โปร่งใส) ================= -->
+                <div id="stamp-step1-1" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 150px; position: absolute; top: 20px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
                     <h4 style="text-align: center; margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">โรงเรียนวัดแม่กะ</h4>
                     <p style="margin: 2px 0;">เลขรับที่: <span id="s1-recvno" class="font-bold">...</span></p>
                     <p style="margin: 2px 0;">วันที่: <span id="s1-date" class="font-bold"></span></p>
                 </div>
 
-                <div id="stamp-step1-2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 200px; position: absolute; top: 120px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
+                <div id="stamp-step1-2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 220px; position: absolute; top: 120px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
                     <p style="margin: 2px 0 5px 0;">เรียน <span style="color: blue; font-weight: bold; font-size: 11px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</span></p>
-                    <textarea placeholder="" rows="3" style="width: 100%; border: none; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 35px;"></textarea>
+                    <textarea placeholder="" rows="3" style="width: 100%; border: none; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 40px;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
                         <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <p style="margin: 2px 0;">(นายพิสิษฐ์ ตั้งสกุล)</p>
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: รองผู้อำนวยการ (ปรับเล็กลง + 2 บรรทัด) ================= -->
-                <div id="stamp-step2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 175px; position: absolute; top: 250px; left: 20px; background: transparent; z-index: 10; font-size: 9px;">
+                <!-- ================= ตราประทับ: รองผู้อำนวยการ (ขยายความกว้าง + สูง 2 บรรทัด + โปร่งใส) ================= -->
+                <div id="stamp-step2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 200px; position: absolute; top: 250px; left: 20px; background: transparent; z-index: 10; font-size: 9px;">
                     <div style="font-size: 10px; margin-bottom: 2px; font-weight: bold;">เรียน ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     <div style="display: flex; gap: 4px; margin-bottom: 2px;">
                         <label style="cursor: pointer;">เพื่อโปรด</label>
@@ -200,8 +215,8 @@
                         <label><input type="radio" name="dpt" style="accent-color: blue; width:9px; height:9px;"> งบประมาณ</label>
                         <label><input type="radio" name="dpt" style="accent-color: blue; width:9px; height:9px;"> ทั่วไป</label>
                     </div>
-                    <!-- บรรทัดข้อความ 2 บรรทัด -->
-                    <textarea rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.2; height: 26px;"></textarea>
+                    <!-- 2 บรรทัด -->
+                    <textarea rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.3; height: 30px;"></textarea>
                     <div style="text-align: center; margin-top: 2px;">
                         <img class="sign-image" src="" style="height: 22px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นายจักรพงศ์ จันทวงศ์)</div>
@@ -209,8 +224,8 @@
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: ผู้อำนวยการ (ปรับเล็กลง + 3 บรรทัด) ================= -->
-                <div id="stamp-step3" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 160px; position: absolute; top: 400px; left: 20px; background: transparent; z-index: 10; font-size: 10px;">
+                <!-- ================= ตราประทับ: ผู้อำนวยการ (ขยายความกว้าง + สูง 3 บรรทัด + โปร่งใส) ================= -->
+                <div id="stamp-step3" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 190px; position: absolute; top: 400px; left: 20px; background: transparent; z-index: 10; font-size: 10px;">
                     <div style="display: flex; justify-content: space-around; margin-bottom: 2px; font-weight: bold;">
                         <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:9px; height:9px;"> ทราบ</label>
                         <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:9px; height:9px;"> ยุติเรื่อง</label>
@@ -219,8 +234,8 @@
                         <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:9px; height:9px;"> ดำเนินการตามเสนอ</label>
                     </div>
                     <div style="margin-bottom: 1px; font-weight: bold;">ข้อสั่งการ</div>
-                    <!-- บรรทัดข้อความ 3 บรรทัด -->
-                    <textarea rows="3" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.2; height: 38px;"></textarea>
+                    <!-- 3 บรรทัด -->
+                    <textarea rows="3" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.3; height: 42px;"></textarea>
                     <div style="text-align: center; margin-top: 2px;">
                         <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นางสาวศิริยา อินทกาโมทย์)</div>
@@ -251,7 +266,6 @@
                 <div id="user-list-container" class="hide mb-6 p-4 border rounded bg-blue-50">
                     <p class="text-sm text-gray-800 mb-3 font-bold">กรุณาเลือกรายชื่อผู้รับเรื่อง (ธุรการ/ครู/รอง/ผอ.):</p>
                     <div id="all-user-checkboxes" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                        <!-- รายชื่อทุกคนจะถูกเติมเข้ามาจาก GAS -->
                     </div>
                 </div>
 
@@ -271,12 +285,12 @@
         let currentPdfId = null;
         let originalPdfBase64 = null; 
         
-        // ข้อมูลตัวแปรสำหรับเก็บรายการเอกสาร
         let globalActionDocs = [];
         let globalInboxDocs = [];
-        let currentTab = 'action'; 
+        let globalAllDocs = [];
+        let currentTab = 'inbox'; 
 
-        // โหลดรูปลายเซ็น (Proxy ข้ามโดเมน)
+        // โหลดรูปลายเซ็น (แก้ปัญหารูปไม่ขึ้นโดยแปลงเป็น Base64 จาก Proxy)
         async function preloadSignatures() {
             try {
                 const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://img2.pic.in.th/NormalAppImage15.th.png');
@@ -287,11 +301,10 @@
                     document.querySelectorAll('.sign-image').forEach(img => img.src = reader.result);
                 };
                 reader.readAsDataURL(blob);
-            } catch (e) { console.log(e); }
+            } catch (e) { console.log("Sig load err:", e); }
         }
         preloadSignatures();
 
-        // --- 1. ระบบ Login ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = document.getElementById('username').value;
@@ -299,20 +312,13 @@
 
             Swal.fire({ title: 'กำลังตรวจสอบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
-                const res = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'login', username: user, password: pass })
-                });
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login', username: user, password: pass }) });
                 const data = await res.json();
                 if (data.success) {
                     currentUser = data.user;
                     loginSuccess();
-                } else {
-                    Swal.fire('ข้อผิดพลาด', data.message, 'error');
-                }
-            } catch (err) {
-                Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบการตั้งค่า GAS', 'error');
-            }
+                } else { Swal.fire('ข้อผิดพลาด', data.message, 'error'); }
+            } catch (err) { Swal.fire('การเชื่อมต่อล้มเหลว', 'โปรดตรวจสอบการตั้งค่า GAS', 'error'); }
         });
 
         function loginSuccess() {
@@ -321,18 +327,20 @@
             document.getElementById('dashboard-view').classList.remove('hide');
             document.getElementById('user-info').innerText = `${currentUser.name} (${currentUser.role})`;
             
-            if (currentUser.role === 'ธุรการ') {
+            // ตั้งค่า UI ตามสิทธิ์
+            if (currentUser.role !== 'ครู') {
                 document.getElementById('admin-actions').classList.remove('hide');
+                document.getElementById('tab-action').classList.remove('hide');
+                document.getElementById('tab-all').classList.remove('hide');
+                currentTab = 'action';
+            } else {
+                currentTab = 'inbox';
             }
             
             const today = new Date().toLocaleDateString('th-TH');
             document.getElementById('s1-date').innerText = today;
 
-            // ครูไม่มีสิทธิ์เกษียณ ให้เปิดไปหน้า Inbox ทันที
-            if (currentUser.role === 'ครู') {
-                document.getElementById('tabs-container').classList.add('hide');
-                currentTab = 'inbox';
-            }
+            switchTab(currentTab);
             fetchDocuments();
         }
 
@@ -343,19 +351,28 @@
             document.getElementById('login-form').reset();
         }
 
-        // --- 2. ระบบดึงข้อมูลและจัดการแท็บ ---
+        // --- ระบบจัดการแท็บ ---
         function switchTab(tabName) {
             currentTab = tabName;
             const btnAction = document.getElementById('tab-action');
             const btnInbox = document.getElementById('tab-inbox');
+            const btnAll = document.getElementById('tab-all');
+            const filterEl = document.getElementById('doc-filter');
             
-            if (tabName === 'action') {
-                btnAction.className = 'tab-btn tab-active';
-                btnInbox.className = 'tab-btn tab-inactive';
-            } else {
-                btnAction.className = 'tab-btn tab-inactive';
-                btnInbox.className = 'tab-btn tab-active';
-            }
+            btnAction.className = 'tab-btn ' + (tabName === 'action' ? 'tab-active' : 'tab-inactive');
+            btnInbox.className = 'tab-btn ' + (tabName === 'inbox' ? 'tab-active' : 'tab-inactive');
+            btnAll.className = 'tab-btn ' + (tabName === 'all' ? 'tab-active' : 'tab-inactive');
+            
+            if (currentUser.role === 'ครู') btnAction.classList.add('hide'), btnAll.classList.add('hide');
+
+            // จัดการ Dropdown Filter
+            filterEl.value = 'all';
+            document.querySelectorAll('.filter-inbox').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.filter-all').forEach(el => el.classList.add('hide'));
+            
+            if (tabName === 'inbox') document.querySelectorAll('.filter-inbox').forEach(el => el.classList.remove('hide'));
+            if (tabName === 'all') document.querySelectorAll('.filter-all').forEach(el => el.classList.remove('hide'));
+
             renderTable();
         }
 
@@ -363,15 +380,13 @@
             const tbody = document.getElementById('doc-table-body');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">กำลังโหลดข้อมูลเอกสาร...</td></tr>';
             try {
-                const res = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getDocs', role: currentUser.role, name: currentUser.name })
-                });
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getDocs', role: currentUser.role, name: currentUser.name }) });
                 const data = await res.json();
                 
                 if (data.success) {
                     globalActionDocs = data.actionDocs;
                     globalInboxDocs = data.inboxDocs;
+                    globalAllDocs = data.allDocs || [];
                     renderTable();
                 }
             } catch (err) {
@@ -383,7 +398,25 @@
             const tbody = document.getElementById('doc-table-body');
             tbody.innerHTML = '';
             
-            let displayDocs = currentTab === 'action' ? globalActionDocs : globalInboxDocs;
+            let displayDocs = [];
+            if (currentTab === 'action') displayDocs = globalActionDocs;
+            else if (currentTab === 'inbox') displayDocs = globalInboxDocs;
+            else if (currentTab === 'all') displayDocs = globalAllDocs;
+
+            // นำ Filter มาใช้
+            const filterVal = document.getElementById('doc-filter').value;
+            displayDocs = displayDocs.filter(doc => {
+                if (filterVal === 'all') return true;
+                const isAck = doc.acks.includes(currentUser.name);
+                const totalTargets = doc.targets.length;
+                const ackCount = doc.acks.length;
+                
+                if (filterVal === 'unread') return !isAck;
+                if (filterVal === 'read') return isAck;
+                if (filterVal === 'incomplete') return ackCount < totalTargets && totalTargets > 0;
+                if (filterVal === 'complete') return ackCount === totalTargets && totalTargets > 0;
+                return true;
+            });
 
             if (displayDocs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">ไม่มีเอกสารในหมวดหมู่นี้</td></tr>';
@@ -393,31 +426,44 @@
             displayDocs.forEach(doc => {
                 let btnHtml = '';
                 let statusHtml = `<span class="text-blue-600 font-medium">${doc.status}</span>`;
+                const totalTargets = doc.targets.length;
+                const ackCount = doc.acks.length;
                 
+                // ปุ่มดูเอกสาร (เปิดแบบไม่มีตราประทับ)
+                const viewBtn = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'view')" class="text-blue-600 hover:text-blue-900 bg-blue-100 px-3 py-1 rounded text-xs shadow-sm w-full mb-1">ดูเอกสาร</button>`;
+                // ปุ่มแนบไฟล์
+                const attachBtn = `<button onclick="openAttachModal('${doc.docId}')" class="text-green-600 hover:text-green-900 bg-green-100 px-3 py-1 rounded text-xs shadow-sm w-full mb-1">แนบไฟล์</button>`;
+                
+                // เช็คว่ามีคนแนบไฟล์ไหม (แสดงปุ่มดูไฟล์แนบ)
+                let viewAttachHtml = '';
+                if (doc.attachments && doc.attachments.length > 0) {
+                    viewAttachHtml = `<button onclick="showAttachments('${encodeURIComponent(JSON.stringify(doc.attachments))}')" class="text-purple-600 hover:text-purple-900 bg-purple-100 px-3 py-1 rounded text-xs shadow-sm w-full">ดูไฟล์แนบ (${doc.attachments.length})</button>`;
+                }
+
                 if (currentTab === 'action') {
-                    // โหมดเกษียณ/จ่ายเรื่อง
-                    btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'action')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200">เปิดเอกสาร / ประทับตรา</button>`;
-                } else {
-                    // โหมด Inbox (ย้ายปุ่มรับทราบมาคอลัมน์สถานะ)
-                    const totalTargets = doc.targets.length;
-                    const ackCount = doc.acks.length;
+                    btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'action')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200 w-full">ประทับตรา / จัดการ</button>`;
+                    if (statusHtml.includes('ยุติเรื่อง')) btnHtml = viewBtn; // ถ้ายุติแล้วให้แค่ดู
+                } 
+                else if (currentTab === 'inbox' || currentTab === 'all') {
+                    btnHtml = `<div class="flex flex-col space-y-1 w-24">${viewBtn}${attachBtn}${viewAttachHtml}</div>`;
                     
-                    btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'inbox')" class="text-blue-600 hover:text-blue-900 bg-blue-100 px-3 py-1 rounded shadow-sm hover:bg-blue-200 text-sm">ดูเอกสาร</button>`;
+                    // เพิ่มปุ่มรับทราบลงในคอลัมน์สถานะ (เฉพาะ Inbox ที่มีชื่อตัวเอง)
+                    let ackBtn = '';
+                    if (currentTab === 'inbox' && !doc.acks.includes(currentUser.name)) {
+                        ackBtn = `<button onclick="acknowledgeDoc('${doc.docId}')" class="mt-1 bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 rounded text-xs shadow-sm">กดรับทราบ</button>`;
+                    }
                     
                     statusHtml = `
-                        <div class="flex flex-col items-start space-y-1">
+                        <div class="flex flex-col items-start">
                             <span class="text-blue-600 font-medium">${doc.status}</span>
-                            <button onclick="showAckStatus('${encodeURIComponent(JSON.stringify(doc.targets))}', '${encodeURIComponent(JSON.stringify(doc.acks))}')" class="text-gray-700 bg-gray-100 border px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm">
-                                สถานะรับทราบ (${ackCount}/${totalTargets})
-                            </button>
+                            <button onclick="showAckStatus('${encodeURIComponent(JSON.stringify(doc.targets))}', '${encodeURIComponent(JSON.stringify(doc.acks))}')" class="text-gray-700 bg-gray-100 border px-2 py-1 rounded text-xs hover:bg-gray-200 mt-1 shadow-sm w-full text-left">สถานะ: รับทราบ (${ackCount}/${totalTargets})</button>
+                            ${ackBtn}
                         </div>
                     `;
                 }
 
                 let displayRecv = doc.recvNo;
-                if (displayRecv && displayRecv.toString().startsWith("'")) {
-                    displayRecv = displayRecv.toString().substring(1);
-                }
+                if (displayRecv && displayRecv.toString().startsWith("'")) displayRecv = displayRecv.toString().substring(1);
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -429,6 +475,19 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // --- แสดงไฟล์แนบ ---
+        function showAttachments(encodedAtt) {
+            const attachments = JSON.parse(decodeURIComponent(encodedAtt));
+            let htmlContent = '<div class="text-left text-sm max-h-60 overflow-y-auto space-y-2 mt-2">';
+            attachments.forEach(att => {
+                htmlContent += `<div class="border-b pb-1">
+                    👤 <b>${att.user}</b> แนบไฟล์: <br><a href="${att.url}" target="_blank" class="text-blue-600 underline text-xs">คลิกเพื่อเปิดไฟล์</a>
+                </div>`;
+            });
+            htmlContent += '</div>';
+            Swal.fire({ title: 'รายการไฟล์แนบ', html: htmlContent, confirmButtonText: 'ปิด' });
         }
 
         // --- ดูสถานะคนรับทราบ ---
@@ -445,26 +504,66 @@
             });
             htmlContent += '</div>';
 
-            Swal.fire({
-                title: 'สถานะการรับทราบจดหมาย',
-                html: htmlContent,
-                confirmButtonText: 'ปิด'
-            });
+            Swal.fire({ title: 'สถานะการรับทราบจดหมาย', html: htmlContent, confirmButtonText: 'ปิด' });
         }
 
-        // --- 3. อัปโหลดไฟล์ใหม่ ---
+        async function acknowledgeDoc(docId) {
+            Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'acknowledgeDoc', docId: docId, name: currentUser.name }) });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire('สำเร็จ', 'บันทึกการรับทราบเรียบร้อยแล้ว', 'success');
+                    fetchDocuments(); 
+                }
+            } catch (err) { Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกได้', 'error'); }
+        }
+
+        // --- ระบบแนบไฟล์ ---
+        function openAttachModal(docId) {
+            currentDocId = docId;
+            document.getElementById('attach-modal').classList.remove('hide');
+        }
+        function closeAttachModal() {
+            document.getElementById('attach-modal').classList.add('hide');
+            document.getElementById('attach-form').reset();
+        }
+        async function submitAttach(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('attach-file').files[0];
+            if (!fileInput) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกไฟล์', 'warning');
+            
+            Swal.fire({ title: 'กำลังอัปโหลด...', text: 'กำลังส่งไฟล์เข้า Google Drive', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const base64data = reader.result.split(',')[1];
+                try {
+                    const res = await fetch(GAS_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'uploadAttachment', base64: base64data, filename: fileInput.name, mimeType: fileInput.type, docId: currentDocId, name: currentUser.name })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire('สำเร็จ', `แนบไฟล์เรียบร้อยแล้ว`, 'success');
+                        closeAttachModal();
+                        fetchDocuments();
+                    }
+                } catch (err) { Swal.fire('การเชื่อมต่อมีปัญหา', 'กรุณาลองใหม่อีกครั้ง', 'error'); }
+            };
+            reader.readAsDataURL(fileInput);
+        }
+
+        // --- อัปโหลดไฟล์ใหม่ ---
         function showUploadModal() { document.getElementById('upload-modal').classList.remove('hide'); }
         function closeUploadModal() { document.getElementById('upload-modal').classList.add('hide'); document.getElementById('upload-form').reset(); }
-
         async function submitUpload(e) {
             e.preventDefault();
             const fileInput = document.getElementById('pdf-file').files[0];
             const subject = document.getElementById('doc-subject').value;
             const fromSender = document.getElementById('doc-from').value;
 
-            if (!fileInput) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกไฟล์ PDF', 'warning');
-            Swal.fire({ title: 'กำลังอัปโหลด...', text: 'กำลังส่งไฟล์เข้า Google Drive', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
+            if (!fileInput) return;
+            Swal.fire({ title: 'กำลังอัปโหลด...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             const reader = new FileReader();
             reader.onload = async function() {
                 const base64data = reader.result.split(',')[1];
@@ -478,17 +577,13 @@
                         Swal.fire('สำเร็จ', `อัปโหลดเรียบร้อย\nเลขรับ: ${data.recvNo}`, 'success');
                         closeUploadModal();
                         fetchDocuments();
-                    } else {
-                        Swal.fire('ผิดพลาด', 'ไม่สามารถบันทึกลง Sheet ได้', 'error');
                     }
-                } catch (err) {
-                    Swal.fire('การเชื่อมต่อมีปัญหา', 'กรุณาลองใหม่อีกครั้ง', 'error');
-                }
+                } catch (err) { Swal.fire('ผิดพลาด', 'ลองใหม่อีกครั้ง', 'error'); }
             };
             reader.readAsDataURL(fileInput);
         }
 
-        // --- 4. การจัดการ Workspace ---
+        // --- การจัดการ Workspace ---
         interact('.draggable-stamp').draggable({
             listeners: {
                 move(event) {
@@ -515,31 +610,22 @@
             document.getElementById('workspace-doc-info').innerText = `เอกสาร: ${cleanRecvNo}`;
             if(document.getElementById('s1-recvno')) document.getElementById('s1-recvno').innerText = cleanRecvNo;
 
-            // ซ่อนเครื่องมือทั้งหมดก่อน
+            // ซ่อนตราประทับทั้งหมด
             document.querySelectorAll('.draggable-stamp').forEach(el => {
                 el.classList.add('hide');
                 el.style.transform = 'translate(0px, 0px)';
-                el.setAttribute('data-x', 0);
-                el.setAttribute('data-y', 0);
+                el.setAttribute('data-x', 0); el.setAttribute('data-y', 0);
             });
             document.getElementById('dispatch-panel').classList.add('hide');
             document.getElementById('btn-stamp-save').classList.add('hide');
-            document.getElementById('btn-acknowledge').classList.add('hide');
 
-            // ตรวจสอบ Mode
-            if (mode === 'inbox') {
-                // โหมด Inbox จะไม่ให้ประทับตรา แค่กดรับทราบได้ (ถ้ายังไม่เคยกด)
-                const doc = globalInboxDocs.find(d => d.docId === docId);
-                if (doc && !doc.acks.includes(currentUser.name)) {
-                    document.getElementById('btn-acknowledge').classList.remove('hide');
-                }
+            if (mode === 'view') {
+                // ถ้าแค่เปิดดูเฉยๆ ไม่ต้องแสดงตราประทับ
             } 
             else if (status === 'รอธุรการจ่ายเรื่องให้ครู' && currentUser.role === 'ธุรการ') {
-                // โหมดจ่ายเรื่องของธุรการ
                 document.getElementById('dispatch-panel').classList.remove('hide');
-                loadAllUserList();
+                loadAllUserList(); 
             } else {
-                // โหมดประทับตรา
                 document.getElementById('btn-stamp-save').classList.remove('hide');
                 if (currentUser.role === 'ธุรการ') {
                     document.getElementById('stamp-step1-1').classList.remove('hide');
@@ -560,9 +646,7 @@
                     await renderRealPDF(data.base64);
                     Swal.close();
                 }
-            } catch (err) {
-                Swal.fire('ล้มเหลว', 'ไม่สามารถเชื่อมต่อ Google Drive ได้', 'error');
-            }
+            } catch (err) { Swal.fire('ล้มเหลว', 'ไม่สามารถเชื่อมต่อ Google Drive ได้', 'error'); }
         }
 
         function closeWorkspace() {
@@ -594,27 +678,7 @@
             await page.render({ canvasContext: context, viewport: viewport }).promise;
         }
 
-        // --- บันทึกการรับทราบ (โหมด Inbox) ---
-        async function acknowledgeDoc() {
-            Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            try {
-                const res = await fetch(GAS_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'acknowledgeDoc', docId: currentDocId, name: currentUser.name })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    Swal.fire('สำเร็จ', 'บันทึกการรับทราบเรียบร้อยแล้ว', 'success').then(() => {
-                        document.getElementById('btn-acknowledge').classList.add('hide');
-                        fetchDocuments(); // อัปเดตข้อมูลจำนวนคนรับทราบ
-                    });
-                }
-            } catch (err) {
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกได้', 'error');
-            }
-        }
-
-        // --- 5. บันทึกและประทับตรา ---
+        // --- บันทึกและประทับตรา ---
         async function saveAndStamp() {
             if (!originalPdfBase64) return;
             Swal.fire({ title: 'กำลังบันทึกและส่งต่อ...', text: 'กำลังประทับตราลงในเอกสาร...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -643,6 +707,13 @@
                 const scaleY = firstPage.getHeight() / container.offsetHeight;
                 const activeStamps = Array.from(document.querySelectorAll('.draggable-stamp:not(.hide)'));
                 
+                // แก้ปัญหา Textarea ข้อความหาย โดยการยัด innerHTML เข้าไปก่อน Capture
+                activeStamps.forEach(stamp => {
+                    stamp.querySelectorAll('textarea').forEach(ta => {
+                        ta.innerHTML = ta.value; // ฝังข้อความลง DOM
+                    });
+                });
+
                 for (let stamp of activeStamps) {
                     const canvasStamp = await html2canvas(stamp, { backgroundColor: null, scale: 2 });
                     const pngImageBytes = canvasStamp.toDataURL('image/png');
@@ -684,14 +755,11 @@
             }
         }
 
-        // --- 6. ธุรการจ่ายเรื่อง (Step 4) ---
+        // --- ธุรการจ่ายเรื่อง (Step 4) ---
         function toggleUserList() {
             const selected = document.querySelector('input[name="dispatch_type"]:checked');
-            if (selected && selected.value === 'บางคน') {
-                document.getElementById('user-list-container').classList.remove('hide');
-            } else {
-                document.getElementById('user-list-container').classList.add('hide');
-            }
+            if (selected && selected.value === 'บางคน') document.getElementById('user-list-container').classList.remove('hide');
+            else document.getElementById('user-list-container').classList.add('hide');
         }
 
         async function loadAllUserList() {
@@ -710,11 +778,9 @@
 
         async function submitDispatch() {
             const type = document.querySelector('input[name="dispatch_type"]:checked');
-            if (!type) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปแบบการดำเนินการ', 'warning');
+            if (!type) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปแบบ', 'warning');
 
-            let newStatus = '';
-            let nextRole = '';
-            let targetTeacher = '';
+            let newStatus = '', nextRole = '', targetTeacher = '';
 
             if (type.value === 'ยุติเรื่อง') {
                 newStatus = 'ยุติเรื่อง (เก็บเข้าแฟ้ม)';
@@ -726,7 +792,6 @@
             } else if (type.value === 'บางคน') {
                 const checkboxes = document.querySelectorAll('.teacher-cb:checked');
                 if (checkboxes.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกรายชื่ออย่างน้อย 1 ท่าน', 'warning');
-                
                 targetTeacher = Array.from(checkboxes).map(cb => cb.value).join(', ');
                 newStatus = 'แจ้งให้ทราบ / ดำเนินการ';
                 nextRole = 'ครู';
@@ -736,20 +801,15 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({
-                        action: 'updateDoc', docId: currentDocId, newStatus: newStatus, nextRole: nextRole, targetTeacher: targetTeacher, base64: '' 
-                    })
+                    body: JSON.stringify({ action: 'updateDoc', docId: currentDocId, newStatus: newStatus, nextRole: nextRole, targetTeacher: targetTeacher, base64: '' })
                 });
                 const data = await res.json();
                 if (data.success) {
                     Swal.fire('สำเร็จ!', 'จ่ายเรื่องเรียบร้อยแล้ว', 'success').then(() => {
-                        closeWorkspace();
-                        fetchDocuments(); 
+                        closeWorkspace(); fetchDocuments(); 
                     });
                 }
-            } catch (err) {
-                Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error');
-            }
+            } catch (err) { Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error'); }
         }
     </script>
 </body>
