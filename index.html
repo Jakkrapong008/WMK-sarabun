@@ -21,7 +21,6 @@
         .tab-active { background-color: #2563eb; color: white; }
         .tab-inactive { background-color: #e5e7eb; color: #374151; }
         .tab-inactive:hover { background-color: #d1d5db; }
-        /* ปรับ textarea ให้ไม่มีกรอบและเงา */
         textarea:focus { outline: none; box-shadow: none; }
     </style>
 </head>
@@ -80,7 +79,7 @@
                 </div>
             </div>
 
-            <!-- Tabs System -->
+            <!-- Tabs System (แสดงให้ผู้บริหารและธุรการ) -->
             <div class="flex space-x-2 mb-4" id="tabs-container">
                 <button id="tab-action" onclick="switchTab('action')" class="tab-btn tab-active">งานรอเกษียณ</button>
                 <button id="tab-inbox" onclick="switchTab('inbox')" class="tab-btn tab-inactive">จดหมายเข้า</button>
@@ -167,7 +166,7 @@
                 <!-- แกนหลักสำหรับวาด PDF จริง -->
                 <canvas id="pdf-render-canvas"></canvas>
 
-                <!-- ================= ตราประทับ: ธุรการ (โปร่งใส) ================= -->
+                <!-- ================= ตราประทับ: ธุรการ (โปร่งใส ไม่มีเส้น) ================= -->
                 <div id="stamp-step1-1" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 140px; position: absolute; top: 20px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
                     <h4 style="text-align: center; margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">โรงเรียนวัดแม่กะ</h4>
                     <p style="margin: 2px 0;">เลขรับที่: <span id="s1-recvno" class="font-bold">...</span></p>
@@ -393,19 +392,24 @@
 
             displayDocs.forEach(doc => {
                 let btnHtml = '';
+                let statusHtml = `<span class="text-blue-600 font-medium">${doc.status}</span>`;
                 
                 if (currentTab === 'action') {
                     // โหมดเกษียณ/จ่ายเรื่อง
                     btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'action')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200">เปิดเอกสาร / ประทับตรา</button>`;
                 } else {
-                    // โหมด Inbox
+                    // โหมด Inbox (ย้ายปุ่มรับทราบมาคอลัมน์สถานะ)
                     const totalTargets = doc.targets.length;
                     const ackCount = doc.acks.length;
                     
-                    btnHtml = `
-                        <div class="flex flex-col space-y-1 items-start">
-                            <button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'inbox')" class="text-blue-600 hover:text-blue-900 bg-blue-100 px-3 py-1 rounded shadow-sm hover:bg-blue-200 text-xs">ดูเอกสาร</button>
-                            <button onclick="showAckStatus('${encodeURIComponent(JSON.stringify(doc.targets))}', '${encodeURIComponent(JSON.stringify(doc.acks))}')" class="text-gray-700 bg-gray-100 border px-3 py-1 rounded text-xs hover:bg-gray-200">สถานะ: รับทราบ (${ackCount}/${totalTargets})</button>
+                    btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'inbox')" class="text-blue-600 hover:text-blue-900 bg-blue-100 px-3 py-1 rounded shadow-sm hover:bg-blue-200 text-sm">ดูเอกสาร</button>`;
+                    
+                    statusHtml = `
+                        <div class="flex flex-col items-start space-y-1">
+                            <span class="text-blue-600 font-medium">${doc.status}</span>
+                            <button onclick="showAckStatus('${encodeURIComponent(JSON.stringify(doc.targets))}', '${encodeURIComponent(JSON.stringify(doc.acks))}')" class="text-gray-700 bg-gray-100 border px-2 py-1 rounded text-xs hover:bg-gray-200 shadow-sm">
+                                สถานะรับทราบ (${ackCount}/${totalTargets})
+                            </button>
                         </div>
                     `;
                 }
@@ -420,7 +424,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">${displayRecv || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${doc.fromSender || '-'}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${doc.subject}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${doc.status}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${statusHtml}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${btnHtml}</td>
                 `;
                 tbody.appendChild(tr);
@@ -524,15 +528,16 @@
 
             // ตรวจสอบ Mode
             if (mode === 'inbox') {
-                // ถ้าเป็นโหมด Inbox ตรวจสอบว่าเคยกดรับทราบหรือยัง
+                // โหมด Inbox จะไม่ให้ประทับตรา แค่กดรับทราบได้ (ถ้ายังไม่เคยกด)
                 const doc = globalInboxDocs.find(d => d.docId === docId);
                 if (doc && !doc.acks.includes(currentUser.name)) {
                     document.getElementById('btn-acknowledge').classList.remove('hide');
                 }
             } 
             else if (status === 'รอธุรการจ่ายเรื่องให้ครู' && currentUser.role === 'ธุรการ') {
+                // โหมดจ่ายเรื่องของธุรการ
                 document.getElementById('dispatch-panel').classList.remove('hide');
-                loadAllUserList(); // โหลดรายชื่อทุกคน
+                loadAllUserList();
             } else {
                 // โหมดประทับตรา
                 document.getElementById('btn-stamp-save').classList.remove('hide');
@@ -601,7 +606,7 @@
                 if (data.success) {
                     Swal.fire('สำเร็จ', 'บันทึกการรับทราบเรียบร้อยแล้ว', 'success').then(() => {
                         document.getElementById('btn-acknowledge').classList.add('hide');
-                        fetchDocuments(); // อัปเดตตารางหน้าแรก
+                        fetchDocuments(); // อัปเดตข้อมูลจำนวนคนรับทราบ
                     });
                 }
             } catch (err) {
