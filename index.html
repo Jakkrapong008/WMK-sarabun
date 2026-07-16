@@ -58,11 +58,19 @@
         </nav>
 
         <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div id="admin-actions" class="hide mb-6">
-                <button onclick="showUploadModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    นำเข้าหนังสือรับเรื่องใหม่ (Step 1)
-                </button>
+            <div class="flex justify-between items-center mb-6">
+                <div id="admin-actions" class="hide">
+                    <button onclick="showUploadModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        นำเข้าหนังสือรับเรื่องใหม่ (Step 1)
+                    </button>
+                </div>
+                <div>
+                    <button onclick="fetchDocuments()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded shadow flex items-center text-sm">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        รีเฟรชข้อมูล
+                    </button>
+                </div>
             </div>
 
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -99,7 +107,6 @@
                 
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">จาก</label>
-                    <!-- ตัวเลือก 3 แบบ: สพป.ชม.2, เทศบาลตำบลแม่แตง หรือพิมพ์เอง -->
                     <input list="sender-options" id="doc-from" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ระบุหน่วยงานผู้ส่ง หรือเลือกจากรายการ" required>
                     <datalist id="sender-options">
                         <option value="สพป.ชม.2">
@@ -125,18 +132,18 @@
         <div class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
             <div>
                 <button onclick="closeWorkspace()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded mr-4">← กลับ</button>
-                <span class="font-bold">เครื่องมือเกษียณหนังสือ</span>
+                <span class="font-bold">เครื่องมือจัดการหนังสือ</span>
                 <span id="workspace-doc-info" class="ml-4 text-sm text-gray-400"></span>
             </div>
             <div>
-                <button onclick="saveAndStamp()" class="bg-blue-600 hover:bg-blue-700 font-bold px-6 py-2 rounded text-white shadow-lg flex items-center">
+                <button id="btn-stamp-save" onclick="saveAndStamp()" class="bg-blue-600 hover:bg-blue-700 font-bold px-6 py-2 rounded text-white shadow-lg flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
                     บันทึกและส่งต่อ (อัปเดตสถานะ)
                 </button>
             </div>
         </div>
 
-        <div class="flex-grow overflow-auto p-8 flex justify-center items-start relative" id="pdf-scroll-area">
+        <div class="flex-grow overflow-auto p-8 flex flex-col items-center relative" id="pdf-scroll-area">
             <div id="pdf-container" style="position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
                 <!-- แกนหลักสำหรับวาด PDF จริง -->
                 <canvas id="pdf-render-canvas"></canvas>
@@ -144,62 +151,95 @@
                 <!-- ================= ตราประทับ: ธุรการ (Step 1) ================= -->
                 <div id="stamp-step1-1" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 6px; width: 140px; position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); z-index: 10; font-size: 11px;">
                     <h4 style="text-align: center; margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">โรงเรียนวัดแม่กะ</h4>
-                    <p style="margin: 2px 0;">เลขรับที่: <span id="s1-recvno" class="font-bold border-b border-dashed border-blue-500 pb-0">...</span></p>
+                    <p style="margin: 2px 0;">เลขรับที่: <span id="s1-recvno" class="font-bold pb-0">...</span></p>
                     <p style="margin: 2px 0;">วันที่: <span id="s1-date" class="font-bold"></span></p>
                 </div>
 
                 <div id="stamp-step1-2" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 6px; width: 200px; position: absolute; top: 120px; left: 20px; background: rgba(255,255,255,0.9); z-index: 10; font-size: 11px;">
                     <p style="margin: 2px 0 5px 0;">เรียน <span style="color: blue; font-weight: bold; font-size: 11px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</span></p>
-                    <textarea placeholder="(พิมพ์ข้อความเกษียณ...)" rows="3" style="width: 100%; border: none; border-bottom: 1px dashed blue; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 35px;"></textarea>
+                    <!-- นำเส้นจุดและกรอบออก -->
+                    <textarea placeholder="พิมพ์ข้อความเกษียณ" rows="3" style="width: 100%; border: none; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 35px;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
-                        <!-- เพิ่ม crossorigin="anonymous" เพื่อแก้ปัญหาการเซฟรูปตอนสร้าง PDF -->
-                        <img id="sign-admin" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                        <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <p style="margin: 2px 0;">(นายพิสิษฐ์ ตั้งสกุล)</p>
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: รองผู้อำนวยการ (Step 2) ================= -->
-                <div id="stamp-step2" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 8px; width: 240px; position: absolute; top: 250px; left: 20px; background: rgba(255,255,255,0.95); z-index: 10; font-size: 11px;">
-                    <div style="font-size: 12px; margin-bottom: 6px; font-weight: bold;">เรียน ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
-                    <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+                <!-- ================= ตราประทับ: รองผู้อำนวยการ (Step 2) ปรับขนาดเล็กลง ================= -->
+                <div id="stamp-step2" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 6px; width: 190px; position: absolute; top: 250px; left: 20px; background: rgba(255,255,255,0.95); z-index: 10; font-size: 10px;">
+                    <div style="font-size: 11px; margin-bottom: 4px; font-weight: bold;">เรียน ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
+                    <div style="display: flex; gap: 6px; margin-bottom: 2px;">
                         <label style="cursor: pointer;">เพื่อโปรด</label>
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> ทราบ</label>
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> พิจารณา</label>
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> ทราบ</label>
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> พิจารณา</label>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 6px;">
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> เห็นควรมอบ</label>
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> ยุติเรื่อง</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> เห็นควรมอบ</label>
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> ยุติเรื่อง</label>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-left: 15px; margin-bottom: 6px;">
-                        <label><input type="radio" name="dpt" style="accent-color: blue;"> งานวิชาการ</label>
-                        <label><input type="radio" name="dpt" style="accent-color: blue;"> งานบุคคล</label>
-                        <label><input type="radio" name="dpt" style="accent-color: blue;"> งานงบประมาณ</label>
-                        <label><input type="radio" name="dpt" style="accent-color: blue;"> บริหารทั่วไป</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-left: 10px; margin-bottom: 4px;">
+                        <label><input type="radio" name="dpt" style="accent-color: blue; width:10px;"> วิชาการ</label>
+                        <label><input type="radio" name="dpt" style="accent-color: blue; width:10px;"> บุคคล</label>
+                        <label><input type="radio" name="dpt" style="accent-color: blue; width:10px;"> งบประมาณ</label>
+                        <label><input type="radio" name="dpt" style="accent-color: blue; width:10px;"> ทั่วไป</label>
                     </div>
-                    <textarea placeholder="(ข้อความเพิ่มเติม...)" rows="2" style="width: 100%; border: none; border-bottom: 1px dotted blue; color: blue; background: transparent; outline: none; resize: none; font-size: 11px; height: 25px;"></textarea>
-                    <div style="text-align: center; margin-top: 5px;">
-                        <img id="sign-deputy" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 30px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                    <!-- นำเส้นจุดและกรอบออก -->
+                    <textarea placeholder="พิมพ์ข้อความเพิ่มเติม" rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; height: 25px;"></textarea>
+                    <div style="text-align: center; margin-top: 2px;">
+                        <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นายจักรพงศ์ จันทวงศ์)</div>
-                        <div style="font-size: 10px;">รองผู้อำนวยการโรงเรียนวัดแม่กะ</div>
+                        <div style="font-size: 9px;">รองผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: ผู้อำนวยการ (Step 3) ================= -->
-                <div id="stamp-step3" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 10px; width: 220px; position: absolute; top: 400px; left: 20px; background: rgba(255,255,255,0.95); z-index: 10; font-size: 12px;">
-                    <div style="display: flex; justify-content: space-around; margin-bottom: 6px; font-weight: bold;">
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> ทราบ</label>
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> ยุติเรื่อง</label>
+                <!-- ================= ตราประทับ: ผู้อำนวยการ (Step 3) ปรับขนาดเล็กลง ================= -->
+                <div id="stamp-step3" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 6px; width: 170px; position: absolute; top: 400px; left: 20px; background: rgba(255,255,255,0.95); z-index: 10; font-size: 10px;">
+                    <div style="display: flex; justify-content: space-around; margin-bottom: 4px; font-weight: bold;">
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> ทราบ</label>
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> ยุติเรื่อง</label>
                     </div>
-                    <div style="margin-bottom: 6px; font-weight: bold; text-align: center;">
-                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue;"> ดำเนินการตามเสนอ</label>
+                    <div style="margin-bottom: 4px; font-weight: bold; text-align: center;">
+                        <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:10px;"> ดำเนินการตามเสนอ</label>
                     </div>
                     <div style="margin-bottom: 2px; font-weight: bold;">ข้อสั่งการ</div>
-                    <textarea placeholder="..................................." rows="2" style="width: 100%; border: none; border-bottom: 1px dotted blue; color: blue; background: transparent; outline: none; resize: none; font-size: 12px; height: 25px;"></textarea>
-                    <div style="text-align: center; margin-top: 5px;">
-                        <img id="sign-director" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 35px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                    <!-- นำเส้นจุดและกรอบออก -->
+                    <textarea placeholder="พิมพ์ข้อสั่งการ" rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; height: 25px;"></textarea>
+                    <div style="text-align: center; margin-top: 2px;">
+                        <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นางสาวศิริยา อินทกาโมทย์)</div>
-                        <div style="font-size: 10px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
+                        <div style="font-size: 9px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ================= แผงควบคุม Step 4 (ธุรการจ่ายเรื่อง) ================= -->
+            <div id="dispatch-panel" class="hide bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto mt-6 text-gray-800">
+                <h3 class="text-lg font-bold text-blue-700 mb-4 border-b pb-2">ดำเนินการขั้นสุดท้าย (จ่ายเรื่อง/ยุติเรื่อง)</h3>
+                
+                <div class="mb-4 flex flex-wrap gap-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="radio" name="dispatch_type" value="ยุติเรื่อง" class="form-radio text-blue-600 w-5 h-5" onchange="toggleTeacherList()">
+                        <span class="ml-2 font-medium">ยุติเรื่อง (จบการทำงาน)</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="radio" name="dispatch_type" value="ทุกคน" class="form-radio text-blue-600 w-5 h-5" onchange="toggleTeacherList()">
+                        <span class="ml-2 font-medium">ส่งให้ครูทุกคน</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="radio" name="dispatch_type" value="บางคน" class="form-radio text-blue-600 w-5 h-5" onchange="toggleTeacherList()">
+                        <span class="ml-2 font-medium">ส่งให้ครูบางคน (เลือกชื่อ)</span>
+                    </label>
+                </div>
+
+                <div id="teacher-list-container" class="hide mb-6 p-4 border rounded bg-blue-50">
+                    <p class="text-sm text-gray-800 mb-3 font-bold">กรุณาเลือกรายชื่อครูที่ต้องการส่งเอกสาร:</p>
+                    <div id="teacher-checkboxes" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                        <!-- รายชื่อครูจะถูกเติมเข้ามาจาก GAS -->
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button onclick="submitDispatch()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-8 rounded shadow-lg transition">บันทึกการส่งเรื่อง</button>
                 </div>
             </div>
         </div>
@@ -208,12 +248,31 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-        // URL จาก GAS ของคุณ
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwSfJ58iAHl5H3CMN_plu1E0zkhj_Gzyh3z_oJwxWM75aF1Sq4_P7de9WVm9HSa9C4asg/exec';
         let currentUser = null;
         let currentDocId = null;
         let currentPdfId = null;
-        let originalPdfBase64 = null; // เก็บ Base64 ต้นฉบับไว้
+        let originalPdfBase64 = null; 
+
+        // โหลดรูปลายเซ็นแปลงเป็น Base64 ผ่าน Proxy เพื่อแก้ปัญหาเรื่อง CORS ทำให้ html2canvas ทำงานได้ 100%
+        async function preloadSignatures() {
+            try {
+                const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://img2.pic.in.th/NormalAppImage15.th.png');
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const b64 = reader.result;
+                    document.querySelectorAll('.sign-image').forEach(img => img.src = b64);
+                };
+                reader.readAsDataURL(blob);
+            } catch (e) {
+                console.log("Error loading signature via proxy: ", e);
+            }
+        }
+
+        // โหลดรูปล่วงหน้าเมื่อหน้าเว็บเปิดขึ้นมา
+        preloadSignatures();
 
         // --- 1. ระบบ Login ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -283,7 +342,7 @@
                     data.docs.forEach(doc => {
                         let btnHtml = '';
                         if (doc.currentRole === currentUser.role) {
-                            btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200">เปิดเอกสาร / ประทับตรา</button>`;
+                            btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200">เปิดเอกสาร</button>`;
                         } else {
                             btnHtml = `<span class="text-gray-400 text-xs">รอผู้ที่มีสิทธิ์จัดการ</span>`;
                         }
@@ -295,7 +354,7 @@
 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${displayRecv || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">${displayRecv || '-'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${doc.fromSender || '-'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${doc.subject}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${doc.status}</td>
@@ -347,7 +406,7 @@
             reader.readAsDataURL(fileInput);
         }
 
-        // --- 4. การจัดการ Workspace และลากวาง ---
+        // --- 4. การจัดการ Workspace ---
         interact('.draggable-stamp').draggable({
             listeners: {
                 move(event) {
@@ -361,7 +420,7 @@
             }
         });
 
-        async function openWorkspace(docId, pdfId, recvNo) {
+        async function openWorkspace(docId, pdfId, recvNo, status) {
             currentDocId = docId;
             currentPdfId = pdfId;
             originalPdfBase64 = null;
@@ -377,21 +436,32 @@
                 document.getElementById('s1-recvno').innerText = cleanRecvNo;
             }
 
+            // ซ่อนตราประทับและปุ่มต่างๆ ไว้ก่อน
             document.querySelectorAll('.draggable-stamp').forEach(el => {
                 el.classList.add('hide');
-                // รีเซ็ตตำแหน่ง
                 el.style.transform = 'translate(0px, 0px)';
                 el.setAttribute('data-x', 0);
                 el.setAttribute('data-y', 0);
             });
+            document.getElementById('dispatch-panel').classList.add('hide');
+            document.getElementById('btn-stamp-save').classList.add('hide');
 
-            if (currentUser.role === 'ธุรการ') {
-                document.getElementById('stamp-step1-1').classList.remove('hide');
-                document.getElementById('stamp-step1-2').classList.remove('hide');
-            } else if (currentUser.role === 'รองผู้อำนวยการ') {
-                document.getElementById('stamp-step2').classList.remove('hide');
-            } else if (currentUser.role === 'ผู้อำนวยการ') {
-                document.getElementById('stamp-step3').classList.remove('hide');
+            // ตรวจสอบเงื่อนไขเพื่อแสดงเครื่องมือ
+            if (status === 'รอธุรการจ่ายเรื่องให้ครู' && currentUser.role === 'ธุรการ') {
+                // Step 4: แผงควบคุมจ่ายเรื่องให้ครู
+                document.getElementById('dispatch-panel').classList.remove('hide');
+                loadTeacherList();
+            } else {
+                // การประทับตราตามปกติ
+                document.getElementById('btn-stamp-save').classList.remove('hide');
+                if (currentUser.role === 'ธุรการ') {
+                    document.getElementById('stamp-step1-1').classList.remove('hide');
+                    document.getElementById('stamp-step1-2').classList.remove('hide');
+                } else if (currentUser.role === 'รองผู้อำนวยการ') {
+                    document.getElementById('stamp-step2').classList.remove('hide');
+                } else if (currentUser.role === 'ผู้อำนวยการ') {
+                    document.getElementById('stamp-step3').classList.remove('hide');
+                }
             }
 
             Swal.fire({ title: 'กำลังโหลดเอกสาร PDF...', text: 'โปรดรอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -404,7 +474,7 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    originalPdfBase64 = data.base64; // เก็บ Base64 ไว้ใช้ตอนสร้างไฟล์จริง
+                    originalPdfBase64 = data.base64; 
                     await renderRealPDF(data.base64);
                     Swal.close();
                 } else {
@@ -421,7 +491,6 @@
             document.getElementById('dashboard-view').classList.remove('hide');
         }
 
-        // ฟังก์ชันเรนเดอร์ PDF ลงบน Canvas
         async function renderRealPDF(base64Data) {
             const pdfData = atob(base64Data);
             const uint8Array = new Uint8Array(pdfData.length);
@@ -449,17 +518,15 @@
             await page.render(renderContext).promise;
         }
 
-        // --- 5. บันทึกและส่งต่อ (แก้ไขเพื่อประทับลง PDF จริง) ---
+        // --- 5. บันทึกประทับตรา (สเตปปกติ) ---
         async function saveAndStamp() {
             if (!originalPdfBase64) return Swal.fire('ผิดพลาด', 'ไม่พบไฟล์ PDF ต้นฉบับ', 'error');
-
             Swal.fire({ title: 'กำลังบันทึกและส่งต่อ...', text: 'กำลังประทับตราลงในเอกสาร...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
             try {
                 let newStatus = '';
                 let nextRole = '';
                 
-                // กำหนดการส่งต่อ
                 if (currentUser.role === 'ธุรการ') {
                     newStatus = 'รอรองผู้อำนวยการพิจารณา';
                     nextRole = 'รองผู้อำนวยการ';
@@ -471,39 +538,30 @@
                     nextRole = 'ธุรการ';
                 }
 
-                // โหลด PDF ต้นฉบับ
                 const pdfDoc = await PDFLib.PDFDocument.load(originalPdfBase64);
                 const pages = pdfDoc.getPages();
                 const firstPage = pages[0];
-
                 const container = document.getElementById('pdf-container');
                 const pdfW = firstPage.getWidth();
                 const pdfH = firstPage.getHeight();
                 
-                // หาอัตราส่วนสเกลจาก Canvas กับ PDF จริง
                 const scaleX = pdfW / container.offsetWidth;
                 const scaleY = pdfH / container.offsetHeight;
-
-                // ถ่ายภาพตราประทับที่แสดงอยู่ด้วย html2canvas
                 const activeStamps = Array.from(document.querySelectorAll('.draggable-stamp:not(.hide)'));
                 
                 for (let stamp of activeStamps) {
-                    // ถ่ายรูปตราประทับ
-                    const canvasStamp = await html2canvas(stamp, { backgroundColor: null, scale: 2, useCORS: true });
+                    const canvasStamp = await html2canvas(stamp, { backgroundColor: null, scale: 2 });
                     const pngImageBytes = canvasStamp.toDataURL('image/png');
                     const pngImage = await pdfDoc.embedPng(pngImageBytes);
                     
-                    // คำนวณพิกัด
                     const stampRect = stamp.getBoundingClientRect();
                     const containerRect = container.getBoundingClientRect();
                     
                     const x = stampRect.left - containerRect.left;
                     const y = stampRect.top - containerRect.top;
-                    
                     const stampW = stamp.offsetWidth * scaleX;
                     const stampH = stamp.offsetHeight * scaleY;
                     
-                    // ประทับลง PDF (จุดกำเนิด Y ของ PDF อยู่ด้านล่างซ้าย)
                     firstPage.drawImage(pngImage, {
                         x: x * scaleX,
                         y: pdfH - (y * scaleY) - stampH,
@@ -512,7 +570,6 @@
                     });
                 }
 
-                // นำออกเป็น Base64 ที่ถูกต้องและเสถียรที่สุด (แก้ปัญหาการแปลง string เดิมที่ทำให้เน็ตเวิร์คหลุด)
                 const newPdfBase64 = await pdfDoc.saveAsBase64();
 
                 const res = await fetch(GAS_URL, {
@@ -533,12 +590,91 @@
                         fetchDocuments(); 
                     });
                 } else {
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอัปเดตข้อมูลได้: ' + (data.error || ''), 'error');
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอัปเดตข้อมูลได้', 'error');
                 }
-
             } catch (err) {
                 console.error(err);
                 Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง: ' + err.message, 'error');
+            }
+        }
+
+        // --- 6. ฟังก์ชันสำหรับ Step 4: ธุรการจ่ายเรื่องให้ครู ---
+        function toggleTeacherList() {
+            const selected = document.querySelector('input[name="dispatch_type"]:checked');
+            if (selected && selected.value === 'บางคน') {
+                document.getElementById('teacher-list-container').classList.remove('hide');
+            } else {
+                document.getElementById('teacher-list-container').classList.add('hide');
+            }
+        }
+
+        async function loadTeacherList() {
+            try {
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getTeachers' }) });
+                const data = await res.json();
+                if (data.success) {
+                    const container = document.getElementById('teacher-checkboxes');
+                    container.innerHTML = '';
+                    data.teachers.forEach(teacher => {
+                        container.innerHTML += `<label class="inline-flex items-center"><input type="checkbox" value="${teacher}" class="teacher-cb form-checkbox text-blue-600 mr-2"> ${teacher}</label>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load teachers");
+            }
+        }
+
+        async function submitDispatch() {
+            const type = document.querySelector('input[name="dispatch_type"]:checked');
+            if (!type) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปแบบการดำเนินการ', 'warning');
+
+            let newStatus = '';
+            let nextRole = '';
+            let targetTeacher = '';
+
+            if (type.value === 'ยุติเรื่อง') {
+                newStatus = 'ยุติเรื่อง (เก็บเข้าแฟ้ม)';
+                nextRole = 'สิ้นสุด';
+            } else if (type.value === 'ทุกคน') {
+                newStatus = 'แจ้งให้ทราบ / ดำเนินการ';
+                nextRole = 'ครู';
+                targetTeacher = 'ทุกคน';
+            } else if (type.value === 'บางคน') {
+                const checkboxes = document.querySelectorAll('.teacher-cb:checked');
+                if (checkboxes.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกรายชื่อครูอย่างน้อย 1 ท่าน', 'warning');
+                
+                const selectedTeachers = Array.from(checkboxes).map(cb => cb.value);
+                newStatus = 'แจ้งให้ทราบ / ดำเนินการ';
+                nextRole = 'ครู';
+                targetTeacher = selectedTeachers.join(', '); // รวมรายชื่อโดยมีลูกน้ำคั่น
+            }
+
+            Swal.fire({ title: 'กำลังบันทึกการส่งเรื่อง...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'updateDoc',
+                        docId: currentDocId,
+                        newStatus: newStatus,
+                        nextRole: nextRole,
+                        targetTeacher: targetTeacher,
+                        base64: '' // ส่งค่าว่าง เพราะไม่ต้องสร้าง PDF ใหม่
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    Swal.fire('สำเร็จ!', 'จ่ายเรื่องเรียบร้อยแล้ว', 'success').then(() => {
+                        closeWorkspace();
+                        fetchDocuments(); 
+                    });
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            } catch (err) {
+                Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error');
             }
         }
     </script>
