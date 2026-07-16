@@ -70,7 +70,6 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เลขรับ</th>
-                            <!-- เพิ่มคอลัมน์ "จาก" -->
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">จาก</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เรื่อง</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
@@ -98,12 +97,13 @@
                     <input type="file" id="pdf-file" accept="application/pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
                 </div>
                 
-                <!-- เปลี่ยนหัวข้อ เรียน เป็น จาก และเพิ่ม datalist ให้เลือก สพป.ชม.2 หรือพิมพ์เองได้ -->
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">จาก</label>
+                    <!-- ตัวเลือก 3 แบบ: สพป.ชม.2, เทศบาลตำบลแม่แตง หรือพิมพ์เอง -->
                     <input list="sender-options" id="doc-from" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ระบุหน่วยงานผู้ส่ง หรือเลือกจากรายการ" required>
                     <datalist id="sender-options">
                         <option value="สพป.ชม.2">
+                        <option value="เทศบาลตำบลแม่แตง">
                     </datalist>
                 </div>
 
@@ -137,7 +137,7 @@
         </div>
 
         <div class="flex-grow overflow-auto p-8 flex justify-center items-start relative" id="pdf-scroll-area">
-            <div id="pdf-container" style="position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div id="pdf-container" style="position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
                 <!-- แกนหลักสำหรับวาด PDF จริง -->
                 <canvas id="pdf-render-canvas"></canvas>
 
@@ -149,16 +149,12 @@
                 </div>
 
                 <div id="stamp-step1-2" class="draggable-stamp hide" style="border: 2px solid blue; color: blue; padding: 6px; width: 200px; position: absolute; top: 120px; left: 20px; background: rgba(255,255,255,0.9); z-index: 10; font-size: 11px;">
-                    <p style="margin: 2px 0 5px 0;">เรียน 
-                        <select id="s1-route" style="border: none; color: blue; font-family: inherit; outline: none; background: transparent; font-weight: bold; font-size: 11px;">
-                            <option>รองผู้อำนวยการโรงเรียนวัดแม่กะ</option>
-                            <option>ผู้อำนวยการโรงเรียนวัดแม่กะ</option>
-                        </select>
-                    </p>
+                    <p style="margin: 2px 0 5px 0;">เรียน <span style="color: blue; font-weight: bold; font-size: 11px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</span></p>
                     <textarea placeholder="(พิมพ์ข้อความเกษียณ...)" rows="3" style="width: 100%; border: none; border-bottom: 1px dashed blue; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 35px;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
-                        <img id="sign-admin" src="https://img2.pic.in.th/NormalAppImage15.th.png" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
-                        <p style="margin: 2px 0;">(นางสาวศศิประภา ชมถิ่น)</p>
+                        <!-- เพิ่ม crossorigin="anonymous" เพื่อแก้ปัญหาการเซฟรูปตอนสร้าง PDF -->
+                        <img id="sign-admin" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                        <p style="margin: 2px 0;">(นายพิสิษฐ์ ตั้งสกุล)</p>
                     </div>
                 </div>
 
@@ -182,7 +178,7 @@
                     </div>
                     <textarea placeholder="(ข้อความเพิ่มเติม...)" rows="2" style="width: 100%; border: none; border-bottom: 1px dotted blue; color: blue; background: transparent; outline: none; resize: none; font-size: 11px; height: 25px;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
-                        <img id="sign-deputy" src="https://img2.pic.in.th/NormalAppImage15.th.png" style="height: 30px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                        <img id="sign-deputy" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 30px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นายจักรพงศ์ จันทวงศ์)</div>
                         <div style="font-size: 10px;">รองผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     </div>
@@ -200,7 +196,7 @@
                     <div style="margin-bottom: 2px; font-weight: bold;">ข้อสั่งการ</div>
                     <textarea placeholder="..................................." rows="2" style="width: 100%; border: none; border-bottom: 1px dotted blue; color: blue; background: transparent; outline: none; resize: none; font-size: 12px; height: 25px;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
-                        <img id="sign-director" src="https://img2.pic.in.th/NormalAppImage15.th.png" style="height: 35px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
+                        <img id="sign-director" src="https://img2.pic.in.th/NormalAppImage15.th.png" crossorigin="anonymous" style="height: 35px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นางสาวศิริยา อินทกาโมทย์)</div>
                         <div style="font-size: 10px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     </div>
@@ -217,6 +213,7 @@
         let currentUser = null;
         let currentDocId = null;
         let currentPdfId = null;
+        let originalPdfBase64 = null; // เก็บ Base64 ต้นฉบับไว้
 
         // --- 1. ระบบ Login ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -291,14 +288,9 @@
                             btnHtml = `<span class="text-gray-400 text-xs">รอผู้ที่มีสิทธิ์จัดการ</span>`;
                         }
 
-                        // ป้องกันการแสดงผลที่มีเครื่องหมาย ' ติดมา (กรณี GAS ส่งรูปแบบ Text มาให้)
                         let displayRecv = doc.recvNo;
                         if (displayRecv && displayRecv.toString().startsWith("'")) {
                             displayRecv = displayRecv.toString().substring(1);
-                        }
-                        // แจ้งเตือนกรณีเจอข้อมูลวันที่ผิดพลาดในตารางเก่า
-                        if (typeof displayRecv === 'string' && displayRecv.includes('T') && displayRecv.includes('Z')) {
-                            displayRecv = "<span class='text-red-500 text-xs'>รอแก้ในชีต</span>";
                         }
 
                         const tr = document.createElement('tr');
@@ -326,7 +318,7 @@
             e.preventDefault();
             const fileInput = document.getElementById('pdf-file').files[0];
             const subject = document.getElementById('doc-subject').value;
-            const fromSender = document.getElementById('doc-from').value; // รับค่าจาก
+            const fromSender = document.getElementById('doc-from').value;
 
             if (!fileInput) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกไฟล์ PDF', 'warning');
             Swal.fire({ title: 'กำลังอัปโหลด...', text: 'กำลังส่งไฟล์เข้า Google Drive', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -372,11 +364,11 @@
         async function openWorkspace(docId, pdfId, recvNo) {
             currentDocId = docId;
             currentPdfId = pdfId;
+            originalPdfBase64 = null;
             
             document.getElementById('dashboard-view').classList.add('hide');
             document.getElementById('workspace-view').classList.remove('hide');
             
-            // ลบ ' ออกเพื่อแสดงผลให้สวยงาม
             let cleanRecvNo = recvNo;
             if(cleanRecvNo && cleanRecvNo.toString().startsWith("'")) cleanRecvNo = cleanRecvNo.toString().substring(1);
             
@@ -385,8 +377,14 @@
                 document.getElementById('s1-recvno').innerText = cleanRecvNo;
             }
 
-            // จัดการตราประทับ
-            document.querySelectorAll('.draggable-stamp').forEach(el => el.classList.add('hide'));
+            document.querySelectorAll('.draggable-stamp').forEach(el => {
+                el.classList.add('hide');
+                // รีเซ็ตตำแหน่ง
+                el.style.transform = 'translate(0px, 0px)';
+                el.setAttribute('data-x', 0);
+                el.setAttribute('data-y', 0);
+            });
+
             if (currentUser.role === 'ธุรการ') {
                 document.getElementById('stamp-step1-1').classList.remove('hide');
                 document.getElementById('stamp-step1-2').classList.remove('hide');
@@ -396,7 +394,6 @@
                 document.getElementById('stamp-step3').classList.remove('hide');
             }
 
-            // ดึงไฟล์ PDF ของจริงจาก Google Drive มาแสดงผล
             Swal.fire({ title: 'กำลังโหลดเอกสาร PDF...', text: 'โปรดรอสักครู่...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
             try {
@@ -407,6 +404,7 @@
                 const data = await res.json();
                 
                 if (data.success) {
+                    originalPdfBase64 = data.base64; // เก็บ Base64 ไว้ใช้ตอนสร้างไฟล์จริง
                     await renderRealPDF(data.base64);
                     Swal.close();
                 } else {
@@ -423,7 +421,7 @@
             document.getElementById('dashboard-view').classList.remove('hide');
         }
 
-        // ฟังก์ชันเรนเดอร์ PDF ของจริงลงบน Canvas
+        // ฟังก์ชันเรนเดอร์ PDF ลงบน Canvas
         async function renderRealPDF(base64Data) {
             const pdfData = atob(base64Data);
             const uint8Array = new Uint8Array(pdfData.length);
@@ -434,10 +432,7 @@
             const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
             const pdf = await loadingTask.promise;
             
-            // ดึงเฉพาะหน้าที่ 1 มาแสดงให้ประทับตรา
             const page = await pdf.getPage(1);
-            
-            // ปรับ Scale ให้คมชัดขึ้น
             const scale = 1.3; 
             const viewport = page.getViewport({ scale: scale });
 
@@ -446,35 +441,28 @@
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             
-            // ปรับขนาด Container ให้พอดีกับ Canvas เพื่อให้ตราประทับไม่ลอยออกนอกกรอบ
             const container = document.getElementById('pdf-container');
             container.style.width = viewport.width + 'px';
             container.style.height = viewport.height + 'px';
 
-            const renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
+            const renderContext = { canvasContext: context, viewport: viewport };
             await page.render(renderContext).promise;
         }
 
-        // --- 5. บันทึกและส่งต่อ ---
+        // --- 5. บันทึกและส่งต่อ (แก้ไขเพื่อประทับลง PDF จริง) ---
         async function saveAndStamp() {
-            Swal.fire({ title: 'กำลังบันทึกและส่งต่อ...', text: 'กำลังเชื่อมต่อฐานข้อมูล', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            if (!originalPdfBase64) return Swal.fire('ผิดพลาด', 'ไม่พบไฟล์ PDF ต้นฉบับ', 'error');
+
+            Swal.fire({ title: 'กำลังบันทึกและส่งต่อ...', text: 'กำลังประทับตราลงในเอกสาร...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             
             try {
                 let newStatus = '';
                 let nextRole = '';
                 
+                // กำหนดการส่งต่อ
                 if (currentUser.role === 'ธุรการ') {
-                    const routeTo = document.getElementById('s1-route').value;
-                    if (routeTo.includes('รองผู้อำนวยการ')) {
-                        newStatus = 'รอรองผู้อำนวยการพิจารณา';
-                        nextRole = 'รองผู้อำนวยการ';
-                    } else {
-                        newStatus = 'รอผู้อำนวยการสั่งการ';
-                        nextRole = 'ผู้อำนวยการ';
-                    }
+                    newStatus = 'รอรองผู้อำนวยการพิจารณา';
+                    nextRole = 'รองผู้อำนวยการ';
                 } else if (currentUser.role === 'รองผู้อำนวยการ') {
                     newStatus = 'รอผู้อำนวยการสั่งการ';
                     nextRole = 'ผู้อำนวยการ';
@@ -483,18 +471,49 @@
                     nextRole = 'ธุรการ';
                 }
 
-                // ปัจจุบันสร้างไฟล์ PDF เปล่าๆ จำลองส่งไปอัปเดตสถานะก่อน (ของจริงจะใช้ข้อมูล canvas)
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                const page = pdfDoc.addPage([595, 842]);
-                page.drawText('เอกสารที่ผ่านการประทับตราแล้ว', { x: 50, y: 700, size: 20 });
-                const pdfBytes = await pdfDoc.save();
+                // โหลด PDF ต้นฉบับ
+                const pdfDoc = await PDFLib.PDFDocument.load(originalPdfBase64);
+                const pages = pdfDoc.getPages();
+                const firstPage = pages[0];
+
+                const container = document.getElementById('pdf-container');
+                const pdfW = firstPage.getWidth();
+                const pdfH = firstPage.getHeight();
                 
-                let binary = '';
-                const bytes = new Uint8Array(pdfBytes);
-                for (let i = 0; i < bytes.byteLength; i++) {
-                    binary += String.fromCharCode(bytes[i]);
+                // หาอัตราส่วนสเกลจาก Canvas กับ PDF จริง
+                const scaleX = pdfW / container.offsetWidth;
+                const scaleY = pdfH / container.offsetHeight;
+
+                // ถ่ายภาพตราประทับที่แสดงอยู่ด้วย html2canvas
+                const activeStamps = Array.from(document.querySelectorAll('.draggable-stamp:not(.hide)'));
+                
+                for (let stamp of activeStamps) {
+                    // ถ่ายรูปตราประทับ
+                    const canvasStamp = await html2canvas(stamp, { backgroundColor: null, scale: 2, useCORS: true });
+                    const pngImageBytes = canvasStamp.toDataURL('image/png');
+                    const pngImage = await pdfDoc.embedPng(pngImageBytes);
+                    
+                    // คำนวณพิกัด
+                    const stampRect = stamp.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const x = stampRect.left - containerRect.left;
+                    const y = stampRect.top - containerRect.top;
+                    
+                    const stampW = stamp.offsetWidth * scaleX;
+                    const stampH = stamp.offsetHeight * scaleY;
+                    
+                    // ประทับลง PDF (จุดกำเนิด Y ของ PDF อยู่ด้านล่างซ้าย)
+                    firstPage.drawImage(pngImage, {
+                        x: x * scaleX,
+                        y: pdfH - (y * scaleY) - stampH,
+                        width: stampW,
+                        height: stampH,
+                    });
                 }
-                const dummyBase64Pdf = window.btoa(binary);
+
+                // นำออกเป็น Base64 ที่ถูกต้องและเสถียรที่สุด (แก้ปัญหาการแปลง string เดิมที่ทำให้เน็ตเวิร์คหลุด)
+                const newPdfBase64 = await pdfDoc.saveAsBase64();
 
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
@@ -503,7 +522,7 @@
                         docId: currentDocId,
                         newStatus: newStatus,
                         nextRole: nextRole,
-                        base64: dummyBase64Pdf
+                        base64: newPdfBase64
                     })
                 });
                 const data = await res.json();
@@ -514,12 +533,12 @@
                         fetchDocuments(); 
                     });
                 } else {
-                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอัปเดตข้อมูลได้', 'error');
+                    Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอัปเดตข้อมูลได้: ' + (data.error || ''), 'error');
                 }
 
             } catch (err) {
                 console.error(err);
-                Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error');
+                Swal.fire('เกิดข้อผิดพลาด', 'การเชื่อมต่อขัดข้อง: ' + err.message, 'error');
             }
         }
     </script>
