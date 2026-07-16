@@ -21,10 +21,13 @@
         .tab-inactive { background-color: #e5e7eb; color: #374151; }
         .tab-inactive:hover { background-color: #d1d5db; }
         textarea:focus { outline: none; box-shadow: none; }
+        /* สไตล์สำหรับกล่องข้อความจำลองตอนถ่ายภาพ PDF */
+        .temp-text-div { color: blue; font-family: 'Sarabun', sans-serif; }
     </style>
 </head>
 <body>
 
+    <!-- ==================== หน้าต่าง Login ==================== -->
     <div id="login-view" class="min-h-screen flex items-center justify-center">
         <div class="bg-white p-8 rounded-xl shadow-lg w-96 max-w-full">
             <div class="text-center mb-6">
@@ -45,6 +48,7 @@
         </div>
     </div>
 
+    <!-- ==================== หน้า Dashboard ==================== -->
     <div id="dashboard-view" class="hide min-h-screen">
         <nav class="bg-blue-700 shadow-md">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -69,13 +73,10 @@
                     </button>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <!-- Dropdown Filter (เรียงตามสถานะ) -->
                     <select id="doc-filter" onchange="renderTable()" class="border-gray-300 rounded shadow-sm text-sm py-2 px-3 focus:outline-none focus:ring-blue-500">
                         <option value="all">แสดงเอกสารทั้งหมด</option>
-                        <!-- ตัวเลือกสำหรับ Inbox -->
                         <option value="unread" class="filter-inbox hide">เอกสารที่ยังไม่ได้ดู</option>
                         <option value="read" class="filter-inbox hide">เอกสารที่ดูแล้ว</option>
-                        <!-- ตัวเลือกสำหรับ All Docs -->
                         <option value="incomplete" class="filter-all hide">รับทราบยังไม่ครบ</option>
                         <option value="complete" class="filter-all hide">รับทราบครบทุกคน</option>
                     </select>
@@ -162,6 +163,7 @@
         </div>
     </div>
 
+    <!-- ==================== หน้า Workspace (จัดการ PDF & ตราประทับ) ==================== -->
     <div id="workspace-view" class="hide min-h-screen bg-gray-800 flex flex-col">
         <div class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
             <div>
@@ -181,7 +183,8 @@
             <div id="pdf-container" style="position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; background: white;">
                 <canvas id="pdf-render-canvas"></canvas>
 
-                <!-- ================= ตราประทับ: ธุรการ (ขยายความกว้าง + โปร่งใส) ================= -->
+                <!-- ================= ตราประทับ: ธุรการ ================= -->
+                <!-- เพิ่มความสูง และระยะห่างบรรทัด (line-height: 1.6) ป้องกันสระลอย -->
                 <div id="stamp-step1-1" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 150px; position: absolute; top: 20px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
                     <h4 style="text-align: center; margin: 0 0 5px 0; font-weight: bold; font-size: 13px;">โรงเรียนวัดแม่กะ</h4>
                     <p style="margin: 2px 0;">เลขรับที่: <span id="s1-recvno" class="font-bold">...</span></p>
@@ -190,14 +193,14 @@
 
                 <div id="stamp-step1-2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 220px; position: absolute; top: 120px; left: 20px; background: transparent; z-index: 10; font-size: 11px;">
                     <p style="margin: 2px 0 5px 0;">เรียน <span style="color: blue; font-weight: bold; font-size: 11px;">ผู้อำนวยการโรงเรียนวัดแม่กะ</span></p>
-                    <textarea placeholder="" rows="3" style="width: 100%; border: none; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.2; height: 40px;"></textarea>
+                    <textarea placeholder="" rows="3" style="width: 100%; border: none; color: blue; font-family: inherit; background: transparent; resize: none; outline: none; font-size: 11px; line-height: 1.6; height: 55px; overflow: hidden;"></textarea>
                     <div style="text-align: center; margin-top: 5px;">
                         <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <p style="margin: 2px 0;">(นายพิสิษฐ์ ตั้งสกุล)</p>
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: รองผู้อำนวยการ (ขยายความกว้าง + สูง 2 บรรทัด + โปร่งใส) ================= -->
+                <!-- ================= ตราประทับ: รองผู้อำนวยการ ================= -->
                 <div id="stamp-step2" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 200px; position: absolute; top: 250px; left: 20px; background: transparent; z-index: 10; font-size: 9px;">
                     <div style="font-size: 10px; margin-bottom: 2px; font-weight: bold;">เรียน ผู้อำนวยการโรงเรียนวัดแม่กะ</div>
                     <div style="display: flex; gap: 4px; margin-bottom: 2px;">
@@ -215,8 +218,8 @@
                         <label><input type="radio" name="dpt" style="accent-color: blue; width:9px; height:9px;"> งบประมาณ</label>
                         <label><input type="radio" name="dpt" style="accent-color: blue; width:9px; height:9px;"> ทั่วไป</label>
                     </div>
-                    <!-- 2 บรรทัด -->
-                    <textarea rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.3; height: 30px;"></textarea>
+                    <!-- 2 บรรทัด (เพิ่ม line-height และความสูง) -->
+                    <textarea rows="2" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.6; height: 35px; overflow: hidden;"></textarea>
                     <div style="text-align: center; margin-top: 2px;">
                         <img class="sign-image" src="" style="height: 22px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นายจักรพงศ์ จันทวงศ์)</div>
@@ -224,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- ================= ตราประทับ: ผู้อำนวยการ (ขยายความกว้าง + สูง 3 บรรทัด + โปร่งใส) ================= -->
+                <!-- ================= ตราประทับ: ผู้อำนวยการ ================= -->
                 <div id="stamp-step3" class="draggable-stamp hide" style="color: blue; padding: 2px; width: 190px; position: absolute; top: 400px; left: 20px; background: transparent; z-index: 10; font-size: 10px;">
                     <div style="display: flex; justify-content: space-around; margin-bottom: 2px; font-weight: bold;">
                         <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:9px; height:9px;"> ทราบ</label>
@@ -234,8 +237,8 @@
                         <label style="cursor: pointer;"><input type="checkbox" style="accent-color: blue; width:9px; height:9px;"> ดำเนินการตามเสนอ</label>
                     </div>
                     <div style="margin-bottom: 1px; font-weight: bold;">ข้อสั่งการ</div>
-                    <!-- 3 บรรทัด -->
-                    <textarea rows="3" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.3; height: 42px;"></textarea>
+                    <!-- 3 บรรทัด (เพิ่ม line-height และความสูง) -->
+                    <textarea rows="3" style="width: 100%; border: none; color: blue; background: transparent; outline: none; resize: none; font-size: 10px; line-height: 1.6; height: 52px; overflow: hidden;"></textarea>
                     <div style="text-align: center; margin-top: 2px;">
                         <img class="sign-image" src="" style="height: 25px; object-fit: contain; margin: 0 auto -2px auto;" alt="sign">
                         <div style="margin: 2px 0 0 0;">(นางสาวศิริยา อินทกาโมทย์)</div>
@@ -290,17 +293,15 @@
         let globalAllDocs = [];
         let currentTab = 'inbox'; 
 
-        // โหลดรูปลายเซ็น (แก้ปัญหารูปไม่ขึ้นโดยแปลงเป็น Base64 จาก Proxy)
+        // โหลดรูปลายเซ็นแก้ปัญหา CORS ใหม่ (ดึงไฟล์แบบ JSON แล้วเอา base64)
         async function preloadSignatures() {
             try {
-                const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://img2.pic.in.th/NormalAppImage15.th.png');
+                const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://img2.pic.in.th/NormalAppImage15.th.png');
                 const res = await fetch(url);
-                const blob = await res.blob();
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    document.querySelectorAll('.sign-image').forEach(img => img.src = reader.result);
-                };
-                reader.readAsDataURL(blob);
+                const data = await res.json();
+                if (data.contents) {
+                    document.querySelectorAll('.sign-image').forEach(img => img.src = data.contents);
+                }
             } catch (e) { console.log("Sig load err:", e); }
         }
         preloadSignatures();
@@ -327,7 +328,6 @@
             document.getElementById('dashboard-view').classList.remove('hide');
             document.getElementById('user-info').innerText = `${currentUser.name} (${currentUser.role})`;
             
-            // ตั้งค่า UI ตามสิทธิ์
             if (currentUser.role !== 'ครู') {
                 document.getElementById('admin-actions').classList.remove('hide');
                 document.getElementById('tab-action').classList.remove('hide');
@@ -351,7 +351,6 @@
             document.getElementById('login-form').reset();
         }
 
-        // --- ระบบจัดการแท็บ ---
         function switchTab(tabName) {
             currentTab = tabName;
             const btnAction = document.getElementById('tab-action');
@@ -365,7 +364,6 @@
             
             if (currentUser.role === 'ครู') btnAction.classList.add('hide'), btnAll.classList.add('hide');
 
-            // จัดการ Dropdown Filter
             filterEl.value = 'all';
             document.querySelectorAll('.filter-inbox').forEach(el => el.classList.add('hide'));
             document.querySelectorAll('.filter-all').forEach(el => el.classList.add('hide'));
@@ -403,7 +401,6 @@
             else if (currentTab === 'inbox') displayDocs = globalInboxDocs;
             else if (currentTab === 'all') displayDocs = globalAllDocs;
 
-            // นำ Filter มาใช้
             const filterVal = document.getElementById('doc-filter').value;
             displayDocs = displayDocs.filter(doc => {
                 if (filterVal === 'all') return true;
@@ -429,12 +426,9 @@
                 const totalTargets = doc.targets.length;
                 const ackCount = doc.acks.length;
                 
-                // ปุ่มดูเอกสาร (เปิดแบบไม่มีตราประทับ)
                 const viewBtn = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'view')" class="text-blue-600 hover:text-blue-900 bg-blue-100 px-3 py-1 rounded text-xs shadow-sm w-full mb-1">ดูเอกสาร</button>`;
-                // ปุ่มแนบไฟล์
                 const attachBtn = `<button onclick="openAttachModal('${doc.docId}')" class="text-green-600 hover:text-green-900 bg-green-100 px-3 py-1 rounded text-xs shadow-sm w-full mb-1">แนบไฟล์</button>`;
                 
-                // เช็คว่ามีคนแนบไฟล์ไหม (แสดงปุ่มดูไฟล์แนบ)
                 let viewAttachHtml = '';
                 if (doc.attachments && doc.attachments.length > 0) {
                     viewAttachHtml = `<button onclick="showAttachments('${encodeURIComponent(JSON.stringify(doc.attachments))}')" class="text-purple-600 hover:text-purple-900 bg-purple-100 px-3 py-1 rounded text-xs shadow-sm w-full">ดูไฟล์แนบ (${doc.attachments.length})</button>`;
@@ -442,12 +436,11 @@
 
                 if (currentTab === 'action') {
                     btnHtml = `<button onclick="openWorkspace('${doc.docId}', '${doc.pdfId}', '${doc.recvNo}', '${doc.status}', 'action')" class="text-indigo-600 hover:text-indigo-900 bg-indigo-100 px-3 py-1 rounded shadow-sm hover:bg-indigo-200 w-full">ประทับตรา / จัดการ</button>`;
-                    if (statusHtml.includes('ยุติเรื่อง')) btnHtml = viewBtn; // ถ้ายุติแล้วให้แค่ดู
+                    if (statusHtml.includes('ยุติเรื่อง')) btnHtml = viewBtn; 
                 } 
                 else if (currentTab === 'inbox' || currentTab === 'all') {
                     btnHtml = `<div class="flex flex-col space-y-1 w-24">${viewBtn}${attachBtn}${viewAttachHtml}</div>`;
                     
-                    // เพิ่มปุ่มรับทราบลงในคอลัมน์สถานะ (เฉพาะ Inbox ที่มีชื่อตัวเอง)
                     let ackBtn = '';
                     if (currentTab === 'inbox' && !doc.acks.includes(currentUser.name)) {
                         ackBtn = `<button onclick="acknowledgeDoc('${doc.docId}')" class="mt-1 bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 rounded text-xs shadow-sm">กดรับทราบ</button>`;
@@ -477,7 +470,6 @@
             });
         }
 
-        // --- แสดงไฟล์แนบ ---
         function showAttachments(encodedAtt) {
             const attachments = JSON.parse(decodeURIComponent(encodedAtt));
             let htmlContent = '<div class="text-left text-sm max-h-60 overflow-y-auto space-y-2 mt-2">';
@@ -490,7 +482,6 @@
             Swal.fire({ title: 'รายการไฟล์แนบ', html: htmlContent, confirmButtonText: 'ปิด' });
         }
 
-        // --- ดูสถานะคนรับทราบ ---
         function showAckStatus(encodedTargets, encodedAcks) {
             const targets = JSON.parse(decodeURIComponent(encodedTargets));
             const acks = JSON.parse(decodeURIComponent(encodedAcks));
@@ -610,7 +601,6 @@
             document.getElementById('workspace-doc-info').innerText = `เอกสาร: ${cleanRecvNo}`;
             if(document.getElementById('s1-recvno')) document.getElementById('s1-recvno').innerText = cleanRecvNo;
 
-            // ซ่อนตราประทับทั้งหมด
             document.querySelectorAll('.draggable-stamp').forEach(el => {
                 el.classList.add('hide');
                 el.style.transform = 'translate(0px, 0px)';
@@ -707,10 +697,17 @@
                 const scaleY = firstPage.getHeight() / container.offsetHeight;
                 const activeStamps = Array.from(document.querySelectorAll('.draggable-stamp:not(.hide)'));
                 
-                // แก้ปัญหา Textarea ข้อความหาย โดยการยัด innerHTML เข้าไปก่อน Capture
+                // แก้ปัญหา Textarea ข้อความหาย โดยสร้างกล่องข้อความจำลองมาทับชั่วคราวก่อนถ่ายภาพ
                 activeStamps.forEach(stamp => {
                     stamp.querySelectorAll('textarea').forEach(ta => {
-                        ta.innerHTML = ta.value; // ฝังข้อความลง DOM
+                        const div = document.createElement('div');
+                        div.className = 'temp-text-div';
+                        div.style.cssText = ta.style.cssText;
+                        div.style.whiteSpace = 'pre-wrap';
+                        div.style.wordWrap = 'break-word';
+                        div.innerText = ta.value;
+                        ta.style.display = 'none';
+                        ta.parentNode.insertBefore(div, ta);
                     });
                 });
 
@@ -733,6 +730,12 @@
                         width: stampW, height: stampH,
                     });
                 }
+
+                // คืนค่า Textarea กลับมา
+                activeStamps.forEach(stamp => {
+                    stamp.querySelectorAll('.temp-text-div').forEach(div => div.remove());
+                    stamp.querySelectorAll('textarea').forEach(ta => ta.style.display = 'block');
+                });
 
                 const newPdfBase64 = await pdfDoc.saveAsBase64();
 
